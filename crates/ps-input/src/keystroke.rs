@@ -27,19 +27,24 @@ pub struct KeystrokeHost {
 }
 
 /// Returns true when `rdev::listen` can be acquired (global keystroke hook).
-/// If listen blocks without error, input monitoring is assumed available.
+/// Result is cached for the process lifetime to avoid spawning multiple listeners.
 pub fn probe_input_monitoring() -> bool {
-    let (tx, rx) = mpsc::channel();
-    thread::spawn(move || {
-        let ok = rdev::listen(|_| {}).is_ok();
-        let _ = tx.send(ok);
-    });
+    use std::sync::OnceLock;
 
-    match rx.recv_timeout(Duration::from_millis(300)) {
-        Ok(ok) => ok,
-        Err(mpsc::RecvTimeoutError::Timeout) => true,
-        Err(mpsc::RecvTimeoutError::Disconnected) => false,
-    }
+    static PROBE: OnceLock<bool> = OnceLock::new();
+    *PROBE.get_or_init(|| {
+        let (tx, rx) = mpsc::channel();
+        thread::spawn(move || {
+            let ok = rdev::listen(|_| {}).is_ok();
+            let _ = tx.send(ok);
+        });
+
+        match rx.recv_timeout(Duration::from_millis(300)) {
+            Ok(ok) => ok,
+            Err(mpsc::RecvTimeoutError::Timeout) => true,
+            Err(mpsc::RecvTimeoutError::Disconnected) => false,
+        }
+    })
 }
 
 struct TapState {

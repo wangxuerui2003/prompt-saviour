@@ -56,7 +56,7 @@ jobs:
         run: npm run build
 
       - name: cargo test
-        run: cargo test --workspace
+        run: cargo test --workspace -- --test-threads=1
 
       - name: E2E
         shell: bash

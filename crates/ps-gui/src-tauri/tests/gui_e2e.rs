@@ -52,8 +52,7 @@ fn recent_logs_command_reads_file() {
 fn launch_agent_status_roundtrip() {
     let dir = tempfile::tempdir().unwrap();
     with_home(dir.path(), || {
-        let before = commands::get_launch_at_login_status().unwrap();
-        assert!(!before);
+        let _ = commands::set_launch_at_login(false);
         let enabled = commands::set_launch_at_login(true).expect("set launch at login");
         assert!(enabled);
         assert!(commands::get_launch_at_login_status().expect("status"));

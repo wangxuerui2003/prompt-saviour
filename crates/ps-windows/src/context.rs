@@ -1,7 +1,7 @@
 use ps_core::SessionContext;
 
 pub fn frontmost_session() -> Option<SessionContext> {
-    let window = active_win_pos_rs::get_active_window().ok()??;
+    let window = active_win_pos_rs::get_active_window().ok()?;
     let bundle_id = window
         .process_path
         .file_name()

@@ -10,15 +10,15 @@ fn runtime() -> &'static Runtime {
 pub fn probe_atspi() -> anyhow::Result<bool> {
     use atspi::connection::AccessibilityConnection;
 
-    runtime()
-        .block_on(async { AccessibilityConnection::new().await })
-        .map(|_| true)
-        .map_err(Into::into)
+    match runtime().block_on(async { AccessibilityConnection::new().await }) {
+        Ok(_) => Ok(true),
+        Err(err) => Err(err.into()),
+    }
 }
 
-/// GUI text capture via AT-SPI Text interface.
-/// Keystroke capture remains the primary Linux fallback until this path is expanded.
+/// GUI text capture via AT-SPI.
+/// Keystroke capture remains the primary Linux fallback until Text interface wiring lands.
 pub fn read_focused_text() -> anyhow::Result<Option<String>> {
-    let _ = probe_atspi()?;
+    let _available = probe_atspi()?;
     Ok(None)
 }

@@ -51,6 +51,10 @@ jobs:
         working-directory: crates/ps-gui
         run: npm ci
 
+      - name: Build frontend (required by Tauri generate_context!)
+        working-directory: crates/ps-gui
+        run: npm run build
+
       - name: cargo test
         run: cargo test --workspace
 

@@ -1,0 +1,131 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: release (${{ matrix.target }})
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            target: aarch64-apple-darwin
+            args: --target aarch64-apple-darwin
+            cli_name: prompt-saviour-cli-aarch64-apple-darwin
+          - platform: macos-latest
+            target: x86_64-apple-darwin
+            args: --target x86_64-apple-darwin
+            cli_name: prompt-saviour-cli-x86_64-apple-darwin
+          - platform: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+            args: ""
+            cli_name: prompt-saviour-cli-x86_64-unknown-linux-gnu
+          - platform: windows-latest
+            target: x86_64-pc-windows-msvc
+            args: ""
+            cli_name: prompt-saviour-cli-x86_64-pc-windows-msvc.exe
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-24.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: crates/ps-gui/package-lock.json
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && matrix.target || '' }}
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            .
+            crates/ps-gui/src-tauri
+
+      - name: Install frontend dependencies
+        working-directory: crates/ps-gui
+        run: npm ci
+
+      - name: Build CLI binary
+        run: cargo build --release -p ps-daemon --target ${{ matrix.target }}
+
+      - name: Package CLI binary
+        shell: bash
+        run: |
+          mkdir -p release-assets
+          if [[ "${{ matrix.platform }}" == "windows-latest" ]]; then
+            cp "target/${{ matrix.target }}/release/prompt-saviour.exe" "release-assets/${{ matrix.cli_name }}"
+          else
+            cp "target/${{ matrix.target }}/release/prompt-saviour" "release-assets/${{ matrix.cli_name }}"
+            chmod +x "release-assets/${{ matrix.cli_name }}"
+          fi
+
+      - name: Upload CLI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.cli_name }}
+          path: release-assets/${{ matrix.cli_name }}
+          if-no-files-found: error
+
+      - name: Build and release Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: crates/ps-gui
+          tagName: ${{ github.ref_name }}
+          releaseName: Prompt Saviour ${{ github.ref_name }}
+          releaseBody: |
+            ## Install
+
+            | Platform | File |
+            |----------|------|
+            | macOS Apple Silicon | `.dmg` (aarch64) |
+            | macOS Intel | `.dmg` (x86_64) |
+            | Windows | `.msi` |
+            | Linux | `.deb` and/or `.AppImage` |
+
+            Standalone CLI binaries (`prompt-saviour-cli-*`) are attached for scripting.
+
+            ### Permissions
+
+            Grant capture permissions to the **exact binary path** shown in the app Permissions page.
+            See [docs/permissions](https://github.com/${{ github.repository }}/tree/main/docs/permissions).
+
+            > Builds are unsigned. macOS Gatekeeper / Windows SmartScreen may warn on first open.
+          releaseDraft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          args: ${{ matrix.args }}
+          releaseAssetNamePattern: "[name]-[version]-[platform]-[arch][ext]"
+
+      - name: Attach CLI to release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ github.ref_name }}" \
+            "release-assets/${{ matrix.cli_name }}" \
+            --clobber

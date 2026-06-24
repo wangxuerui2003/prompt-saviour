@@ -1,0 +1,18 @@
+[package]
+name = "ps-windows"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+arboard.workspace = true
+parking_lot.workspace = true
+ps-core = { path = "../ps-core" }
+ps-input = { path = "../ps-input" }
+serde.workspace = true
+tracing.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+active-win-pos-rs = "0.9"
+uiautomation = "0.24"

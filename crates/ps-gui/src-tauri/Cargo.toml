@@ -1,0 +1,40 @@
+[package]
+name = "prompt-saviour-gui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Prompt Saviour desktop GUI"
+
+[lib]
+name = "prompt_saviour_gui_lib"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+anyhow.workspace = true
+arboard.workspace = true
+chrono.workspace = true
+dirs.workspace = true
+parking_lot.workspace = true
+ps-core = { path = "../../ps-core" }
+ps-daemon = { path = "../../ps-daemon" }
+ps-linux = { path = "../../ps-linux" }
+ps-windows = { path = "../../ps-windows" }
+serde.workspace = true
+serde_json.workspace = true
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-shell = "2"
+sysinfo.workspace = true
+tempfile = "3"
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+[target.'cfg(target_os = "macos")'.dependencies]
+ps-macos = { path = "../../ps-macos" }
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

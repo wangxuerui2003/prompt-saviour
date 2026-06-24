@@ -1,0 +1,6 @@
+/target
+**/*.db
+**/*.db-*
+.lavish/
+crates/ps-gui/node_modules
+crates/ps-gui/dist

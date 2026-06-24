@@ -14,5 +14,5 @@ serde.workspace = true
 tracing.workspace = true
 
 [target.'cfg(windows)'.dependencies]
-active-win-pos-rs = "0.9"
+active-win-pos-rs = "0.11"
 uiautomation = "0.24"

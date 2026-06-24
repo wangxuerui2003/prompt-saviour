@@ -84,7 +84,7 @@ jobs:
           fi
 
       - name: Upload CLI artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.cli_name }}
           path: release-assets/${{ matrix.cli_name }}

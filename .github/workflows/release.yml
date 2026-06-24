@@ -34,7 +34,7 @@ jobs:
             cli_name: prompt-saviour-cli-x86_64-pc-windows-msvc.exe
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install Linux dependencies
         if: matrix.platform == 'ubuntu-24.04'

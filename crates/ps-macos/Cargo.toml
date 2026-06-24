@@ -11,7 +11,7 @@ ps-core = { path = "../ps-core" }
 serde.workspace = true
 
 [target.'cfg(target_os = "macos")'.dependencies]
-accessibility-sys = "0.1"
+accessibility-sys = "0.2"
 arboard.workspace = true
 chrono.workspace = true
 core-foundation = "0.10"

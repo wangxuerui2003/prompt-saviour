@@ -4,3 +4,8 @@
 .lavish/
 crates/ps-gui/node_modules
 crates/ps-gui/dist
+crates/ps-gui/src-tauri/icons/android/
+crates/ps-gui/src-tauri/icons/ios/
+crates/ps-gui/src-tauri/icons/Square*.png
+crates/ps-gui/src-tauri/icons/StoreLogo.png
+crates/ps-gui/src-tauri/icons/64x64.png

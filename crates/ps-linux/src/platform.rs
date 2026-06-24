@@ -1,8 +1,3 @@
-mod atspi_text;
-mod clipboard;
-mod context;
-mod permissions;
-
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
@@ -15,8 +10,8 @@ use ps_core::{build_snapshot, CaptureSource, SessionContext};
 use ps_input::{run_keystroke_listener, KeystrokeHost, PasteChord};
 use tracing::{error, info, warn};
 
-pub use context::frontmost_session;
-pub use permissions::{check_permissions, prompt_for_permissions, PermissionStatus};
+pub use crate::context::frontmost_session;
+pub use crate::permissions::{check_permissions, prompt_for_permissions, PermissionStatus};
 
 #[derive(Default)]
 pub struct CaptureHub {
@@ -100,7 +95,7 @@ fn poll_atspi_once(hub: &CaptureHub) {
     if is_excluded(&session) {
         return;
     }
-    match atspi_text::read_focused_text() {
+    match crate::atspi_text::read_focused_text() {
         Ok(Some(text)) => {
             let snapshot = build_snapshot(session, text, CaptureSource::Accessibility);
             *hub.ax_snapshot.lock() = Some(snapshot);
@@ -129,7 +124,7 @@ fn start_keystroke(hub: Arc<CaptureHub>) {
             *hub_for_snap.keystroke_snapshot.lock() = Some(snapshot);
         }),
         session: Arc::new(move || frontmost_session()),
-        clipboard: Arc::new(clipboard::read_clipboard_text),
+        clipboard: Arc::new(crate::clipboard::read_clipboard_text),
         request_gui_poll: Arc::new(move || hub_for_poll.request_immediate_ax_poll()),
         paste_chord: PasteChord::Control,
     };

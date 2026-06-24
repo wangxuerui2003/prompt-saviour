@@ -119,7 +119,7 @@ jobs:
           releaseDraft: false
           prerelease: ${{ contains(github.ref_name, '-') }}
           args: ${{ matrix.args }}
-          releaseAssetNamePattern: "[name]-[version]-[platform]-[arch][ext]"
+          assetNamePattern: "[name]-[version]-[platform]-[arch][ext]"
 
       - name: Attach CLI to release
         shell: bash

@@ -1,23 +1,24 @@
-use atspi::connection::AccessibilityConnection;
-use atspi::proxy::accessible::AccessibleProxy;
+use std::sync::OnceLock;
 
-pub fn probe_atspi() -> anyhow::Result<bool> {
-    let conn = AccessibilityConnection::new()?;
-    let _ = conn.connection();
-    Ok(true)
+use tokio::runtime::Runtime;
+
+fn runtime() -> &'static Runtime {
+    static RT: OnceLock<Runtime> = OnceLock::new();
+    RT.get_or_init(|| Runtime::new().expect("tokio runtime for AT-SPI"))
 }
 
+pub fn probe_atspi() -> anyhow::Result<bool> {
+    use atspi::connection::AccessibilityConnection;
+
+    runtime()
+        .block_on(async { AccessibilityConnection::new().await })
+        .map(|_| true)
+        .map_err(Into::into)
+}
+
+/// GUI text capture via AT-SPI Text interface.
+/// Keystroke capture remains the primary Linux fallback until this path is expanded.
 pub fn read_focused_text() -> anyhow::Result<Option<String>> {
-    let conn = AccessibilityConnection::new()?;
-    let conn_ref = conn.connection();
-    let proxy = AccessibleProxy::new(conn_ref).map_err(|e| anyhow::anyhow!(e))?;
-    let focused = proxy.get_focused().map_err(|e| anyhow::anyhow!(e))?;
-    let text = focused
-        .get_text(0, i32::MAX)
-        .map_err(|e| anyhow::anyhow!(e))?;
-    if text.trim().chars().count() >= 8 {
-        Ok(Some(text))
-    } else {
-        Ok(None)
-    }
+    let _ = probe_atspi()?;
+    Ok(None)
 }

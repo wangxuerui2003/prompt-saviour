@@ -15,4 +15,5 @@ tracing.workspace = true
 
 [target.'cfg(target_os = "linux")'.dependencies]
 active-win-pos-rs = "0.9"
-atspi = { version = "0.22", default-features = false, features = ["connection"] }
+atspi = { version = "0.22", default-features = false, features = ["connection", "tokio"] }
+tokio = { version = "1", features = ["rt-multi-thread"] }

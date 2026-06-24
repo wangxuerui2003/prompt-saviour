@@ -1,4 +1,12 @@
 #[cfg(target_os = "windows")]
+mod clipboard;
+#[cfg(target_os = "windows")]
+mod context;
+#[cfg(target_os = "windows")]
+mod permissions;
+#[cfg(target_os = "windows")]
+mod uia;
+#[cfg(target_os = "windows")]
 mod platform;
 #[cfg(not(target_os = "windows"))]
 mod stub;

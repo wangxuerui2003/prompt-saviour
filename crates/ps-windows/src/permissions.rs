@@ -19,5 +19,5 @@ pub fn prompt_for_permissions() -> PermissionStatus {
 }
 
 fn uia_smoke_test() -> bool {
-    super::uia::read_focused_text().is_ok()
+    crate::uia::read_focused_text().is_ok()
 }

@@ -1,4 +1,12 @@
 #[cfg(target_os = "linux")]
+mod atspi_text;
+#[cfg(target_os = "linux")]
+mod clipboard;
+#[cfg(target_os = "linux")]
+mod context;
+#[cfg(target_os = "linux")]
+mod permissions;
+#[cfg(target_os = "linux")]
 mod platform;
 #[cfg(not(target_os = "linux"))]
 mod stub;

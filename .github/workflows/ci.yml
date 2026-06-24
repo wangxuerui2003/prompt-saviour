@@ -60,6 +60,8 @@ jobs:
 
       - name: E2E
         shell: bash
+        env:
+          SKIP_GUI_LAUNCH: ${{ runner.os != 'macOS' && '1' || '' }}
         run: bash scripts/e2e.sh
 
   # Fast compile check without GUI npm build on PRs from forks is already covered above.

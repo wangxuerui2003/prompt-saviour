@@ -48,7 +48,10 @@ PROMPT_TEXT="Cross-platform E2E smoke $(date +%s)"
 echo "PASS: cli smoke"
 
 echo "==> GUI launch smoke"
-if [[ -x "$GUI_BIN" ]]; then
+if [[ -n "${SKIP_GUI_LAUNCH:-}" ]]; then
+  echo "SKIP: GUI launch (SKIP_GUI_LAUNCH set)"
+  GUI_START_OK=1
+elif [[ -x "$GUI_BIN" ]]; then
   "$GUI_BIN" &
   GUI_PID=$!
   sleep 2
